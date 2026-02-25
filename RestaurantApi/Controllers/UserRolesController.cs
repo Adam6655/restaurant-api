@@ -7,8 +7,9 @@ using RestaurantDTOs;
 
 namespace RestaurantApi.Controllers
 {
-    [Route("api/UserRoles")]
     [ApiController]
+    [Route("api/UserRoles")]
+    [Authorize]
     public class UserRolesController : ControllerBase
     {
         [Authorize(Roles = "Admin")]
@@ -159,6 +160,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Admin")]
         [HttpGet("all", Name = "GetAllUserRoles")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -177,6 +179,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Admin")]
         [HttpGet("alldrivers", Name = "GetAllDrivers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -193,29 +196,6 @@ namespace RestaurantApi.Controllers
                     return NotFound("There Is No Shifts To Show");
                 }
                 return Ok(DriversList);
-            }
-            catch (Exception ex)
-            {
-                return (ActionResult)clsAppGlobals.HandleError(ex);
-            }
-        }
-        [HttpGet("{userID}/coin-savings-summary", Name = "CoinSavingsSummary")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public ActionResult<IEnumerable<clsCoinSavingsSummaryDTO>> CoinSavingsSummary(int userID)
-        {
-            try
-            {
-                clsUser User = clsUser.Find(userID);
-
-                if (User == null)
-                {
-                    return NotFound("Could Not Find The User");
-                }
-
-                return Ok(User.CoinSavingsSummaryDTO);
             }
             catch (Exception ex)
             {

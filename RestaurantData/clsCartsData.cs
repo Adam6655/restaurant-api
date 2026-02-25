@@ -12,138 +12,9 @@ namespace RestaurantData
 {
     public class clsCartsData
     {
-        //public static List<clsCartDTO> GetCartItemsByOrderID(int OrderID)
-        //{
-        //    var CartItemsList = new List<clsCartDTO>();
-
-        //    using (var connection = new SqlConnection(clsDataSettings.ConnectionString))
-        //    using (var command = new SqlCommand("SP_GetCartItemsByOrderID", connection))
-        //    {
-        //        command.CommandType = CommandType.StoredProcedure;
-
-        //        command.Parameters.AddWithValue("@OrderID", OrderID);
-
-        //        connection.Open();
-        //        using (var reader = command.ExecuteReader())
-        //        {
-        //            int ProductNameIndex = reader.GetOrdinal("ProductName");
-        //            int ProductDescriptionIndex = reader.GetOrdinal("ProductDescription");
-        //            int QuantityIndex = reader.GetOrdinal("Quantity");
-        //            int PriceIndex = reader.GetOrdinal("Price");
-        //            int ImageURLIndex = reader.GetOrdinal("ImageURL");
-        //            int CaloriesIndex = reader.GetOrdinal("Calories");
-        //            int NotesIndex = reader.GetOrdinal("Notes");
-
-        //            if (reader.Read())
-        //            {
-        //                string? Notes = !reader.IsDBNull(NotesIndex) ? reader.GetString(NotesIndex) : null;
-        //                CartItemsList.Add(new clsCartDTO
-        //                (
-        //                    reader.GetInt32(ProductNameIndex),
-        //                    reader.GetString(ProductDescriptionIndex),
-        //                    reader.GetByte(QuantityIndex),
-        //                    reader.GetDecimal(PriceIndex),
-        //                    reader.GetString(ImageURLIndex),
-        //                    reader.GetInt32(CaloriesIndex),
-        //                    Notes
-        //                ));
-        //            }
-        //            else
-        //            {
-        //                return null;
-        //            }
-        //        }
-        //    }
-        //    return CartItemsList;
-        //}
-        //public static decimal CalculateCartTotalAmount(List<clsCheckoutCartItemsDTO> CheckoutCartItems)
-        //{
-        //    DataTable CheckoutCartItemsTable = new DataTable();
-        //    CheckoutCartItemsTable.Columns.Add("ProductID", typeof(int));
-        //    CheckoutCartItemsTable.Columns.Add("Quantity", typeof(byte));
-        //    CheckoutCartItemsTable.Columns.Add("Price", typeof(decimal));
-        //    CheckoutCartItemsTable.Columns.Add("Notes", typeof(string));
-
-        //    for (int i = 0; i < CheckoutCartItems.Count; i++)
-        //    {
-        //        CheckoutCartItemsTable.Rows.Add(CheckoutCartItems[i].ProductID, CheckoutCartItems[i].Quantity, CheckoutCartItems[i].Price, CheckoutCartItems[i].Notes ?? (object)DBNull.Value);
-        //    }
-
-        //    using (var connection = new SqlConnection(clsDataSettings.ConnectionString))
-        //    using (var command = new SqlCommand("SP_CalculateCartTotalAmount", connection))
-        //    {
-        //        command.CommandType = CommandType.StoredProcedure;
-
-        //        SqlParameter tvpParam = command.Parameters.AddWithValue("@CartItems", CheckoutCartItemsTable);
-        //        tvpParam.SqlDbType = SqlDbType.Structured;
-        //        tvpParam.TypeName = "CheckoutCartType";
-
-        //        var TotalAmount = new SqlParameter("@TotalAmount", SqlDbType.TinyInt)
-        //        {
-        //            Direction = ParameterDirection.Output
-        //        };
-
-        //        command.Parameters.Add(TotalAmount);
-
-        //        connection.Open();
-        //        command.ExecuteNonQuery();
-
-        //        return (decimal)TotalAmount.Value;
-        //    }
-        //}
-        //public static List<clsCheckoutCartItemsDTO> SyncCartItemsWithDatabase(List<clsCheckoutCartItemsDTO> CheckoutCartItems)
-        //{
-        //    var SyncedCartItemsList = new List<clsCheckoutCartItemsDTO>();
-
-        //    DataTable CheckoutCartItemsTable = new DataTable();
-        //    CheckoutCartItemsTable.Columns.Add("ProductID", typeof(int));
-        //    CheckoutCartItemsTable.Columns.Add("Quantity", typeof(byte));
-        //    CheckoutCartItemsTable.Columns.Add("Price", typeof(decimal));
-        //    CheckoutCartItemsTable.Columns.Add("Notes", typeof(string));
-
-        //    for (int i = 0; i < CheckoutCartItems.Count; i++)
-        //    {
-        //        CheckoutCartItemsTable.Rows.Add(CheckoutCartItems[i].ProductID, CheckoutCartItems[i].Quantity, CheckoutCartItems[i].Price, CheckoutCartItems[i].Notes ?? (object)DBNull.Value);
-        //    }
-
-        //    using (var connection = new SqlConnection(clsDataSettings.ConnectionString))
-        //    using (var command = new SqlCommand("SP_syncCartItemsWithDatabase", connection))
-        //    {
-        //        command.CommandType = CommandType.StoredProcedure;
-
-        //        SqlParameter tvpParam = command.Parameters.AddWithValue("@CartItems", CheckoutCartItemsTable);
-        //        tvpParam.SqlDbType = SqlDbType.Structured;
-        //        tvpParam.TypeName = "CheckoutCartType";
-
-        //        connection.Open();
-        //        using (var reader = command.ExecuteReader())
-        //        {
-        //            int ProductNameIndex = reader.GetOrdinal("ProductName");
-        //            int QuantityIndex = reader.GetOrdinal("Quantity");
-        //            int PriceIndex = reader.GetOrdinal("Price");
-        //            int NotesIndex = reader.GetOrdinal("Notes");
-        //            if (reader.Read())
-        //            {
-        //                string? Notes = !reader.IsDBNull(NotesIndex) ? reader.GetString(NotesIndex) : null;
-        //                SyncedCartItemsList.Add(new clsCheckoutCartItemsDTO
-        //                (
-        //                    reader.GetInt32(ProductNameIndex),
-        //                    reader.GetByte(QuantityIndex),
-        //                    reader.GetDecimal(PriceIndex),
-        //                    Notes
-        //                ));
-        //            }
-        //            else
-        //            {
-        //                return null;
-        //            }
-        //        }
-        //    }
-        //    return SyncedCartItemsList;
-        //}
-        public static List<clsCart2DTO> GetCart(int OrderID)
+        public static List<clsCartDTO> GetCart(int OrderID)
         {
-            var CartItemsList = new List<clsCart2DTO>();
+            var CartItemsList = new List<clsCartDTO>();
 
             using (var connection = new SqlConnection(clsDataSettings.ConnectionString))
             using (var command = new SqlCommand("SP_GetCart", connection))
@@ -176,7 +47,7 @@ namespace RestaurantData
                         string? Notes = !reader.IsDBNull(NotesIndex) ? reader.GetString(NotesIndex) : null;
                         int? AddOnID = !reader.IsDBNull(AddOnIDIndex) ? reader.GetInt32(AddOnIDIndex) : null;
 
-                        CartItemsList.Add(new clsCart2DTO(new clsProductDTO(reader.GetInt32(ProductIDIndex),
+                        CartItemsList.Add(new clsCartDTO(new clsProductDTO(reader.GetInt32(ProductIDIndex),
                                 reader.GetString(ProductNameIndex), reader.GetString(ProductDescriptionIndex),
                                 reader.GetDecimal(ProductPriceIndex), reader.GetInt32(CategoryIDIndex),
                                 reader.GetString(ProductImageUrlIndex), reader.GetInt32(CaloriesIndex),
@@ -194,7 +65,7 @@ namespace RestaurantData
             }
             return CartItemsList;
         }
-        public static decimal CalculateCartTotalAmount2(List<clsCart2DTO> Cart)
+        public static decimal CalculateCartTotalAmount(List<clsCartDTO> Cart)
         {
             using (var connection = new SqlConnection(clsDataSettings.ConnectionString))
             using (var command = new SqlCommand("SP_CalculateCartTotalAmount2", connection))
@@ -218,9 +89,9 @@ namespace RestaurantData
                 return (decimal)TotalAmount.Value;
             }
         }
-        public static List<clsCart2DTO> SyncCartItemsWithDatabase2(List<clsCart2DTO> Cart)
+        public static List<clsCartDTO> SyncCartItemsWithDatabase(List<clsCartDTO> Cart)
         {
-            List<clsCart2DTO> CartList = new List<clsCart2DTO>();
+            List<clsCartDTO> CartList = new List<clsCartDTO>();
 
             using (var connection = new SqlConnection(clsDataSettings.ConnectionString))
             using (var command = new SqlCommand("SP_syncCartItemsWithDatabase2", connection))
@@ -237,7 +108,7 @@ namespace RestaurantData
                     int? PreviousProductID = null;
                     int? CurrentProductID = null;
                     int? Counter = null;
-                    clsCart2DTO? CartDTO = null;
+                    clsCartDTO? CartDTO = null;
 
                     int ProductIDIndex = reader.GetOrdinal("ProductID");
                     int ProductNameIndex = reader.GetOrdinal("ProductName");
@@ -269,7 +140,7 @@ namespace RestaurantData
                             string? Notes = !reader.IsDBNull(NotesIndex) ? reader.GetString(NotesIndex) : null;
                             int? AddOnID = !reader.IsDBNull(AddOnIDIndex) ? reader.GetInt32(AddOnIDIndex) : null;
 
-                            CartDTO = new clsCart2DTO(new clsProductDTO(reader.GetInt32(ProductIDIndex),
+                            CartDTO = new clsCartDTO(new clsProductDTO(reader.GetInt32(ProductIDIndex),
                                 reader.GetString(ProductNameIndex), reader.GetString(ProductDescriptionIndex),
                                 reader.GetDecimal(ProductPriceIndex), reader.GetInt32(CategoryIDIndex),
                                 reader.GetString(ProductImageUrlIndex), reader.GetInt32(CaloriesIndex),
@@ -301,7 +172,7 @@ namespace RestaurantData
             }
             return CartList;
         }
-        public static DataTable ConvertCartToDataTable(List<clsCart2DTO> Cart)
+        public static DataTable ConvertCartToDataTable(List<clsCartDTO> Cart)
         {
             DataTable CartTable = new DataTable();
             CartTable.Columns.Add("ProductID", typeof(int));
@@ -346,10 +217,10 @@ namespace RestaurantData
             }
             return CartTable;
         }
-        public static bool IsCartUpToDate(List<clsCart2DTO> CheckOutCart)
+        public static bool IsCartUpToDate(List<clsCartDTO> CheckOutCart)
         {
             using (var connection = new SqlConnection(clsDataSettings.ConnectionString))
-            using (var command = new SqlCommand("SP_CalculateCartTotalAmount2", connection))
+            using (var command = new SqlCommand("SP_IsCartUpToDate", connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
 

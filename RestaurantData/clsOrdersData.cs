@@ -14,78 +14,7 @@ namespace RestaurantData
 {
     public class clsOrdersData
     {
-        //public static int AddOrder(clsOrderDTO OrderDTO, clsPaymentInfoDTO PaymentInfoDTO, List<clsCheckoutCartItemsDTO> CheckoutCartItemsDTO)
-        //{
-        //    DataTable CheckoutCartItemsTable = new DataTable();
-        //    CheckoutCartItemsTable.Columns.Add("ProductID", typeof(int));
-        //    CheckoutCartItemsTable.Columns.Add("Quantity", typeof(byte));
-        //    CheckoutCartItemsTable.Columns.Add("Price", typeof(decimal));
-        //    CheckoutCartItemsTable.Columns.Add("Notes", typeof(string));
-
-        //    for (int i = 0; i < CheckoutCartItemsDTO.Count; i++)
-        //    {
-        //        CheckoutCartItemsTable.Rows.Add(CheckoutCartItemsDTO[i].ProductID, CheckoutCartItemsDTO[i].Quantity, CheckoutCartItemsDTO[i].Price, CheckoutCartItemsDTO[i].Notes ?? (object)DBNull.Value);
-        //    }
-
-        //    using (var connection = new SqlConnection(clsDataSettings.ConnectionString))
-        //    using (var command = new SqlCommand("SP_ProcessOrder", connection))
-        //    {
-        //        command.CommandType = CommandType.StoredProcedure;
-
-        //        command.Parameters.AddWithValue("@OrderDate", OrderDTO.OrderDate);
-        //        command.Parameters.AddWithValue("@ServiceType", OrderDTO.ServiceType);
-        //        command.Parameters.Add(new SqlParameter("@TotalAmount", SqlDbType.Decimal)
-        //        {
-        //            Value = OrderDTO.TotalAmount,
-        //            Precision = 10,
-        //            Scale = 2
-        //        });
-        //        command.Parameters.Add(new SqlParameter("@DeliveryFee", SqlDbType.Decimal)
-        //        {
-        //            Value = (object?)OrderDTO.DeliveryFee ?? DBNull.Value,
-        //            Precision = 10,
-        //            Scale = 2
-        //        });
-        //        command.Parameters.AddWithValue("@LocationID", (object?)OrderDTO.LocationID ?? DBNull.Value);
-        //        command.Parameters.AddWithValue("@UserID", OrderDTO.UserID);
-        //        command.Parameters.AddWithValue("@DriverID", (object?)OrderDTO.DriverID ?? DBNull.Value);
-        //        command.Parameters.AddWithValue("@FirstPaymentMethod", PaymentInfoDTO.PaymentMethod[0]);
-        //        command.Parameters.Add(new SqlParameter("@FirstAmount", SqlDbType.Decimal)
-        //        {
-        //            Value = (object?)PaymentInfoDTO.Amount[0] ?? DBNull.Value,
-        //            Precision = 10,
-        //            Scale = 2
-        //        });
-        //        if (PaymentInfoDTO.PaymentMethod.Count > 1)
-        //        {
-        //            command.Parameters.AddWithValue("@SecondPaymentMethod", PaymentInfoDTO.PaymentMethod[1]);
-        //            command.Parameters.Add(new SqlParameter("@SecondAmount", SqlDbType.Decimal)
-        //            {
-        //                Value = (object?)PaymentInfoDTO.Amount[1] ?? DBNull.Value,
-        //                Precision = 10,
-        //                Scale = 2
-        //            });
-        //        }
-        //        else
-        //        {
-        //            command.Parameters.AddWithValue("@SecondPaymentMethod", DBNull.Value);
-        //            command.Parameters.AddWithValue("@SecondAmount", DBNull.Value);
-        //        }
-
-        //            SqlParameter tvpParam = command.Parameters.AddWithValue("@CartItems", CheckoutCartItemsTable);
-        //        tvpParam.SqlDbType = SqlDbType.Structured;
-        //        tvpParam.TypeName = "CheckoutCartType";
-
-        //        var ReturnParam = command.Parameters.Add("@ReturnVal", SqlDbType.Int);
-        //        ReturnParam.Direction = ParameterDirection.ReturnValue;
-
-        //        connection.Open();
-        //        command.ExecuteNonQuery();
-
-        //        return (int)ReturnParam.Value;
-        //    }
-        //}
-        public static int AddOrder2(clsOrderDTO OrderDTO, clsPaymentInfoDTO PaymentInfoDTO, List<clsCart2DTO> CheckoutCartItemsDTO)
+        public static int AddOrder(clsOrderDTO OrderDTO, clsPaymentInfoDTO PaymentInfoDTO, List<clsCartDTO> CheckoutCartItemsDTO)
         {
             using (var connection = new SqlConnection(clsDataSettings.ConnectionString))
             using (var command = new SqlCommand("SP_ProcessOrder", connection))

@@ -7,8 +7,9 @@ using RestaurantDTOs;
 
 namespace RestaurantApi.Controllers
 {
-    [Route("api/Categories")]
     [ApiController]
+    [Route("api/Categories")]
+    [Authorize]
     public class CategoriesController : ControllerBase
     {
         [Authorize(Roles = "Admin")]
@@ -78,7 +79,7 @@ namespace RestaurantApi.Controllers
             }
         }
         [Authorize(Roles = "Admin")]
-        [HttpDelete("{id}", Name = "DeleteAddOn")]
+        [HttpDelete("{id}", Name = "DeleteCategory")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

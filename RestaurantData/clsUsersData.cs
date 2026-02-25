@@ -40,6 +40,10 @@ namespace RestaurantData
                 {
                     Value = UserDTO.Phone
                 });
+                command.Parameters.Add(new SqlParameter("@RefreshToken", SqlDbType.NVarChar, 256)
+                {
+                    Value = (object?)UserDTO.RefreshTokenHash ?? DBNull.Value,
+                });
 
                 var ReturnParam = command.Parameters.Add("@ReturnVal", SqlDbType.Int);
                 ReturnParam.Direction = ParameterDirection.ReturnValue;
@@ -80,6 +84,10 @@ namespace RestaurantData
                 {
                     Value = UserDTO.Phone
                 });
+                command.Parameters.Add(new SqlParameter("@RefreshToken", SqlDbType.NVarChar, 256)
+                {
+                    Value = (object?)UserDTO.RefreshTokenHash ?? DBNull.Value,
+                });
 
                 SqlParameter returnParam = command.Parameters.Add("@ReturnVal", SqlDbType.Int);
                 returnParam.Direction = ParameterDirection.ReturnValue;
@@ -102,8 +110,11 @@ namespace RestaurantData
                 connection.Open();
                 using (var reader = command.ExecuteReader())
                 {
+                    int RefreshTokenIndex = reader.GetOrdinal("RefreshTokenHash");
+                    
                     if (reader.Read())
                     {
+                        string? RefreshTokenHash = !reader.IsDBNull(RefreshTokenIndex) ? reader.GetString(RefreshTokenIndex) : null;
                         return new clsUserDTO
                         (
                             ID,
@@ -113,7 +124,8 @@ namespace RestaurantData
                             reader.GetString(reader.GetOrdinal("DeviceToken")),
                             reader.GetString(reader.GetOrdinal("Email")),
                             reader.GetString(reader.GetOrdinal("PasswordHash")),
-                            reader.GetString(reader.GetOrdinal("Phone"))
+                            reader.GetString(reader.GetOrdinal("Phone")),
+                            RefreshTokenHash
                         );
                     }
                     else
@@ -123,31 +135,34 @@ namespace RestaurantData
                 }
             }
         }
-        public static clsUserDTO GetUserByUserNameAndPassword(string UserName, string PasswordHash)
+        public static clsUserDTO GetUser(string Email, string PasswordHash)
         {
             using (var connection = new SqlConnection(clsDataSettings.ConnectionString))
-            using (var command = new SqlCommand("SP_GetUserByUserNameANDPassword", connection))
+            using (var command = new SqlCommand("SP_GetUserByEmailANDPassword", connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
 
-                command.Parameters.AddWithValue("@UserName", UserName);
+                command.Parameters.AddWithValue("@Email", Email);
                 command.Parameters.AddWithValue("@PasswordHash", PasswordHash);
 
                 connection.Open();
                 using (var reader = command.ExecuteReader())
                 {
+                    int RefreshTokenIndex = reader.GetOrdinal("RefreshTokenHash");
                     if (reader.Read())
                     {
+                        string? RefreshTokenHash = !reader.IsDBNull(RefreshTokenIndex) ? reader.GetString(RefreshTokenIndex) : null;
                         return new clsUserDTO
                         (
                             reader.GetInt32(reader.GetOrdinal("UserID")),
-                            UserName,
+                            reader.GetString(reader.GetOrdinal("UserName")),
                             reader.GetDateTime(reader.GetOrdinal("DateCreated")),
                             reader.GetInt32(reader.GetOrdinal("Coins")),
                             reader.GetString(reader.GetOrdinal("DeviceToken")),
                             reader.GetString(reader.GetOrdinal("Email")),
                             PasswordHash,
-                            reader.GetString(reader.GetOrdinal("Phone"))
+                            reader.GetString(reader.GetOrdinal("Phone")),
+                            RefreshTokenHash
                         );
                     }
                     else
@@ -157,30 +172,33 @@ namespace RestaurantData
                 }
             }
         }
-        public static clsUserDTO GetUserByUserName(string UserName)
+        public static clsUserDTO GetUser(string Email)
         {
             using (var connection = new SqlConnection(clsDataSettings.ConnectionString))
-            using (var command = new SqlCommand("SP_GetUserByUserName", connection))
+            using (var command = new SqlCommand("SP_GetUserByEmail", connection))
             {
                 command.CommandType = CommandType.StoredProcedure;
 
-                command.Parameters.AddWithValue("@UserName", UserName);
+                command.Parameters.AddWithValue("@Email", Email);
 
                 connection.Open();
                 using (var reader = command.ExecuteReader())
                 {
+                    int RefreshTokenIndex = reader.GetOrdinal("RefreshTokenHash");
                     if (reader.Read())
                     {
+                        string? RefreshTokenHash = !reader.IsDBNull(RefreshTokenIndex) ? reader.GetString(RefreshTokenIndex) : null;
                         return new clsUserDTO
                         (
                             reader.GetInt32(reader.GetOrdinal("UserID")),
-                            UserName,
+                            reader.GetString(reader.GetOrdinal("UserName")),
                             reader.GetDateTime(reader.GetOrdinal("DateCreated")),
                             reader.GetInt32(reader.GetOrdinal("Coins")),
                             reader.GetString(reader.GetOrdinal("DeviceToken")),
-                            reader.GetString(reader.GetOrdinal("Email")),
+                            Email,
                             reader.GetString(reader.GetOrdinal("PasswordHash")),
-                            reader.GetString(reader.GetOrdinal("Phone"))
+                            reader.GetString(reader.GetOrdinal("Phone")),
+                            RefreshTokenHash
                         );
                     }
                     else
@@ -224,7 +242,8 @@ namespace RestaurantData
                                 reader.GetString(DeviceTokenIndex),
                                 reader.GetString(EmailIndex),
                                 reader.GetString(PasswordHashIndex),
-                                reader.GetString(PhoneIndex)
+                                reader.GetString(PhoneIndex),
+                                null
                             ));
                         }
                     }

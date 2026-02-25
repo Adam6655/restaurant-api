@@ -1,15 +1,19 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantBusiness;
 using RestaurantData;
 using RestaurantDTOs;
+using System.Security.Claims;
 
 namespace RestaurantApi.Controllers
 {
-    [Route("api/Locations")]
     [ApiController]
+    [Route("api/Locations")]
+    [Authorize]
     public class LocationsController : ControllerBase
     {
+        [Authorize(Roles = "Customer")]
         [HttpPost(Name = "AddNewLocation")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -18,6 +22,12 @@ namespace RestaurantApi.Controllers
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public ActionResult<clsLocationDTO> AddNewLocation(clsLocationDTO LocationDTO)
         {
+            var ID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (LocationDTO.UserID != int.Parse(ID))
+            {
+                return Forbid();
+            }
             try
             {
                 clsLocation Location = new clsLocation();
@@ -43,6 +53,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Customer")]
         [HttpPut(Name = "UpdateLocation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -51,6 +62,12 @@ namespace RestaurantApi.Controllers
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public ActionResult<clsLocationDTO> UpdateLocation(clsLocationDTO LocationDTO)
         {
+            var ID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (LocationDTO.UserID != int.Parse(ID))
+            {
+                return Forbid();
+            }
             try
             {
                 clsLocation Location = clsLocation.Find(LocationDTO.LocationID);
@@ -79,6 +96,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Customer")]
         [HttpDelete("{id}", Name = "DeleteLocation")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -87,6 +105,12 @@ namespace RestaurantApi.Controllers
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public ActionResult DeleteLocation(int id)
         {
+            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (id != int.Parse(userID))
+            {
+                return Forbid();
+            }
             try
             {
                 clsLocation Location = clsLocation.Find(id);
@@ -117,6 +141,12 @@ namespace RestaurantApi.Controllers
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public ActionResult<clsLocationDTO> GetLocationByID(int id)
         {
+            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (id != int.Parse(userID))
+            {
+                return Forbid();
+            }
             try
             {
                 clsLocation Location = clsLocation.Find(id);
@@ -135,16 +165,23 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Customer")]
         [HttpGet("{userID}/locations", Name = "GetAllUserLocations")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public ActionResult<IEnumerable<clsLocationDTO>> GetAllUserLocations(int userID)
+        public ActionResult<IEnumerable<clsLocationDTO>> GetAllUserLocations(int id)
         {
+            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (id != int.Parse(userID))
+            {
+                return Forbid();
+            }
             try
             {
-                List<clsLocationDTO> AllUserLocationsList = clsLocation.GetAllLocations(userID);
+                List<clsLocationDTO> AllUserLocationsList = clsLocation.GetAllLocations(id);
 
                 if (AllUserLocationsList.Count == 0)
                 {

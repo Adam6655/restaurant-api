@@ -9,8 +9,9 @@ using System.Collections.Generic;
 
 namespace RestaurantApi.Controllers
 {
-    [Route("api/Products")]
     [ApiController]
+    [Route("api/Products")]
+    [Authorize]
     public class ProductsController : ControllerBase
     {
         [Authorize(Roles = "Admin")]
@@ -55,7 +56,7 @@ namespace RestaurantApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public ActionResult<clsProductDTO> UpdateUserRole(clsProductDTO ProductDTO)
+        public ActionResult<clsProductDTO> UpdateProduct(clsProductDTO ProductDTO)
         {
             try
             {

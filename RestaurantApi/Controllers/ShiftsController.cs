@@ -7,8 +7,9 @@ using RestaurantDTOs;
 
 namespace RestaurantApi.Controllers
 {
-    [Route("api/Shifts")]
     [ApiController]
+    [Route("api/Shifts")]
+    [Authorize]
     public class ShiftsController : ControllerBase
     {
         [Authorize(Roles = "Admin")]
@@ -163,11 +164,15 @@ namespace RestaurantApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public ActionResult IsRestaurantOpenNow()
+        public ActionResult IsRestaurantOpenNow([FromQuery] bool includeOpeningHour = false)
         {
             string OpeningHour = "";
             try
             {
+                if (!includeOpeningHour)
+                {
+                    Ok(new { IsOpen = clsShift.IsRestaurantOpenNow() });
+                }
                 if (clsShift.IsRestaurantOpenNow(ref OpeningHour))
                 {
                     return Ok();

@@ -34,8 +34,8 @@ namespace RestaurantDTOs
     {
         public clsOrderDTO OrderDTO { get; set; }
         public clsPaymentInfoDTO PaymentInfoDTO { get; set; }
-        public List<clsCheckoutCartItemsDTO> CheckoutCartItemsDTO { get; set; }
-        public clsProcessOrderDTO(clsOrderDTO orderDTO, clsPaymentInfoDTO paymentInfoDTO, List<clsCheckoutCartItemsDTO> checkoutCartItemsDTO)
+        public List<clsCartDTO> CheckoutCartItemsDTO { get; set; }
+        public clsProcessOrderDTO(clsOrderDTO orderDTO, clsPaymentInfoDTO paymentInfoDTO, List<clsCartDTO> checkoutCartItemsDTO)
         {
             this.OrderDTO = orderDTO;
             this.PaymentInfoDTO = paymentInfoDTO;
@@ -46,12 +46,12 @@ namespace RestaurantDTOs
     {
         public clsOrderDTO OrderDTO { get; set; }
         public clsPaymentInfoDTO PaymentInfoDTO { get; set; }
-        public clsCart2DTO Cart2 { get; set; }
-        public clsOrderFullDetailsDTO(clsOrderDTO orderDTO, clsPaymentInfoDTO paymentInfoDTO, clsCart2DTO cart2)
+        public clsCartDTO Cart { get; set; }
+        public clsOrderFullDetailsDTO(clsOrderDTO orderDTO, clsPaymentInfoDTO paymentInfoDTO, clsCartDTO cart)
         {
             this.OrderDTO = orderDTO;
             this.PaymentInfoDTO = paymentInfoDTO;
-            this.Cart2 = cart2;
+            this.Cart = cart;
         }
     }
 }

@@ -4,13 +4,15 @@ using Microsoft.Data.SqlClient;
 using RestaurantBusiness;
 using RestaurantData;
 using RestaurantDTOs;
-
+using Microsoft.AspNetCore.Authorization;
 namespace RestaurantApi.Controllers
 {
-    [Route("api/AddOns")]
     [ApiController]
+    [Route("api/AddOns")]
+    [Authorize]
     public class AddOnsController : ControllerBase
     {
+        [Authorize(Roles = "Admin")]
         [HttpPost(Name = "AddNewAddOn")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -42,6 +44,7 @@ namespace RestaurantApi.Controllers
             }
 
         }
+        [Authorize(Roles = "Admin")]
         [HttpPut(Name = "UpdateAddOn")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -76,6 +79,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{addOnID}", Name = "DeleteAddOn")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -107,6 +111,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [AllowAnonymous]
         [HttpGet("{addOnID}", Name = "GetAddOnByID")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -132,6 +137,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [AllowAnonymous]
         [HttpGet("all", Name = "GetAllAddOns")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -154,6 +160,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [AllowAnonymous]
         [HttpGet("{productID}/addons", Name = "GetProductAddOns")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -176,6 +183,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [AllowAnonymous]
         [HttpGet("{productID}/addons/available", Name = "GetAvailableAddOnsForProduct")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -198,6 +206,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [AllowAnonymous]
         [HttpGet("addOnsByIDs", Name = "GetAddOnsByIDs")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -220,6 +229,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [AllowAnonymous]
         [HttpGet("{addOnID}/products/selections", Name = "GetAddOnProductSelections")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -249,6 +259,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Admin")]
         [HttpPut("{addOnID}/products/selections", Name = "SaveAddOnProductSelections")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

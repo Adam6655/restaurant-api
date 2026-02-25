@@ -1,9 +1,11 @@
 ﻿using RestaurantData;
+using RestaurantDTOs;
 using System;
 using System.Data;
 using System.Drawing;
+using System.Linq.Expressions;
 using System.Numerics;
-using RestaurantDTOs;
+using static RestaurantBusiness.clsUserRole;
 //using System.Collections.Generic;
 //using System.Linq;
 //using System.Text;
@@ -21,10 +23,11 @@ namespace RestaurantBusiness
         public string Email { get; set; }
         public string PasswordHash { get; set; }
         public string Phone { get; set; }
+        public string? RefreshTokenHash { get; set; }
         public clsUserDTO UserDTO
         {
             get { return (new clsUserDTO(this.UserID, this.UserName, this.DateCreated, this.Coins, 
-                this.DeviceToken, this.Email,this.PasswordHash,this.Phone)); }
+                this.DeviceToken, this.Email,this.PasswordHash,this.Phone,this.RefreshTokenHash)); }
         }
         public clsCoinSavingsSummaryDTO CoinSavingsSummaryDTO
         {
@@ -33,7 +36,7 @@ namespace RestaurantBusiness
                   GetCoinsValue(this.Coins), GetSavedAmountFromCoins()));
             }
         }
-        private clsUser(int userID, string userName, DateTime dateCreated, int coins, string deviceToken, string email, string passwordHash, string phone)
+        private clsUser(int userID, string userName, DateTime dateCreated, int coins, string deviceToken, string email, string passwordHash, string phone, string refreshTokenHash)
         {
             this.UserID = userID;
             this.UserName = userName;
@@ -43,6 +46,7 @@ namespace RestaurantBusiness
             this.Email = email;
             this.PasswordHash = passwordHash;
             this.Phone = phone;
+            this.RefreshTokenHash = refreshTokenHash;
         }
         public clsUser()
         {
@@ -54,6 +58,7 @@ namespace RestaurantBusiness
             this.Email = "";
             this.PasswordHash = "";
             this.Phone = "";
+            this.RefreshTokenHash = null;
         }
         public static clsUser Find(int ID)
         {
@@ -61,29 +66,28 @@ namespace RestaurantBusiness
 
             if (UserDTO != null)
             {
-                return new clsUser(ID, UserDTO.UserName, UserDTO.DateCreated, UserDTO.Coins, UserDTO.DeviceToken, UserDTO.Email, UserDTO.PasswordHash, UserDTO.Phone);
+                return new clsUser(ID, UserDTO.UserName, UserDTO.DateCreated, UserDTO.Coins, UserDTO.DeviceToken, UserDTO.Email, UserDTO.PasswordHash, UserDTO.Phone, UserDTO.RefreshTokenHash);
             }
             else
                 return null;
         }
-        public static clsUser Find(string UserName)
+        public static clsUser Find(string Email, string PasswordHash)
         {
-            clsUserDTO UserDTO = clsUsersData.GetUserByUserName(UserName);
+            clsUserDTO UserDTO = clsUsersData.GetUser(Email, PasswordHash);
 
             if (UserDTO != null)
             {
-                return new clsUser(UserDTO.UserID, UserName, UserDTO.DateCreated, UserDTO.Coins, UserDTO.DeviceToken, UserDTO.Email, UserDTO.PasswordHash, UserDTO.Phone);
+                return new clsUser(UserDTO.UserID, Email, UserDTO.DateCreated, UserDTO.Coins, UserDTO.DeviceToken, UserDTO.Email, PasswordHash, UserDTO.Phone, UserDTO.RefreshTokenHash);
             }
             else
                 return null;
         }
-        public static clsUser Find(string UserName, string PasswordHash)
+        public static clsUser Find(string email)
         {
-            clsUserDTO UserDTO = clsUsersData.GetUserByUserNameAndPassword(UserName,PasswordHash);
-
+            clsUserDTO UserDTO = clsUsersData.GetUser(email);
             if (UserDTO != null)
             {
-                return new clsUser(UserDTO.UserID, UserName, UserDTO.DateCreated, UserDTO.Coins, UserDTO.DeviceToken, UserDTO.Email, PasswordHash, UserDTO.Phone);
+                return new clsUser(UserDTO.UserID, UserDTO.UserName, UserDTO.DateCreated, UserDTO.Coins, UserDTO.DeviceToken, email, UserDTO.PasswordHash, UserDTO.Phone, UserDTO.RefreshTokenHash);
             }
             else
                 return null;
@@ -140,6 +144,26 @@ namespace RestaurantBusiness
         public decimal GetSavedAmountFromCoins()
         {
             return clsCoinsTransactionsData.GetSavedAmountFromCoins(this.UserID);
+        }
+        public string GetUserRoleText()
+        {
+            int? Role = GetUserRole();
+            enUserRole? UserRole = Role == null? null : (enUserRole)Role;
+
+            switch (UserRole)
+            {
+                case enUserRole.Admin:
+                    return "Admin";
+
+                case enUserRole.Staff:
+                    return "Staff";
+
+                case enUserRole.Driver:
+                    return "Driver";
+
+                default:
+                    return "Customer";
+            }
         }
         public int? GetUserRole()
         {

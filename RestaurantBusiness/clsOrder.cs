@@ -67,39 +67,13 @@ namespace RestaurantBusiness
             else
                 return null;
         }
-        //private bool _AddNewOrder(clsPaymentInfoDTO PaymentInfoDTO, List<clsCheckoutCartItemsDTO> CheckoutCartItemsDTO)
-        //{
-        //    this.OrderID = clsOrdersData.AddOrder(this.OrderDTO,PaymentInfoDTO,CheckoutCartItemsDTO);
-
-        //    return (this.OrderID != -1);
-        //}
-        private bool _AddNewOrder2(clsPaymentInfoDTO PaymentInfoDTO, List<clsCart2DTO> CartDTO)
+        private bool _AddNewOrder(clsPaymentInfoDTO PaymentInfoDTO, List<clsCartDTO> CartDTO)
         {
-            this.OrderID = clsOrdersData.AddOrder2(this.OrderDTO, PaymentInfoDTO, CartDTO);
+            this.OrderID = clsOrdersData.AddOrder(this.OrderDTO, PaymentInfoDTO, CartDTO);
 
             return (this.OrderID != -1);
         }
-        //public bool Save(clsPaymentInfoDTO PaymentInfoDTO, List<clsCheckoutCartItemsDTO> CheckoutCartItemsDTO)
-        //{
-        //    if (this.OrderID == -1)
-        //    {
-        //        if (this.LocationID != null)
-        //        {
-        //            clsSetting SettingData = clsSetting.GetSettingsInfo();
-        //            clsLocation Location = clsLocation.Find(this.LocationID.Value);
-        //            this.DriverID = clsOrdersData.GetDriverIDWithLeastAmountOfOrders();
-        //            double DeliveryFeeDouble = (double)SettingData.DeliveryFeePerKilo * GetDistanceInKm((double)SettingData.RestaurantLatitude, (double)SettingData.RestaurantLongitude, (double)Location.Latitude, (double)Location.Longitude);
-        //            this.DeliveryFee = (decimal)DeliveryFeeDouble;
-        //        }
-        //        this.TotalAmount = clsOrder.CalculateCartTotalAmount(CheckoutCartItemsDTO);
-        //        return _AddNewOrder(PaymentInfoDTO, CheckoutCartItemsDTO);
-        //    }
-        //    else
-        //    {
-        //        return false;
-        //    }
-        //}
-        public bool Save2(clsPaymentInfoDTO PaymentInfoDTO, List<clsCart2DTO> CartDTO)
+        public bool Save(clsPaymentInfoDTO PaymentInfoDTO, List<clsCartDTO> CartDTO)
         {
             if (this.OrderID == -1)
             {
@@ -111,8 +85,8 @@ namespace RestaurantBusiness
                     double DeliveryFeeDouble = (double)SettingData.DeliveryFeePerKilo * GetDistanceInKm((double)SettingData.RestaurantLatitude, (double)SettingData.RestaurantLongitude, (double)Location.Latitude, (double)Location.Longitude);
                     this.DeliveryFee = (decimal)DeliveryFeeDouble;
                 }
-                this.TotalAmount = clsOrder.CalculateCartTotalAmount2(CartDTO);
-                return _AddNewOrder2(PaymentInfoDTO, CartDTO);
+                this.TotalAmount = clsOrder.CalculateCartTotalAmount(CartDTO);
+                return _AddNewOrder(PaymentInfoDTO, CartDTO);
             }
             else
             {
@@ -147,37 +121,21 @@ namespace RestaurantBusiness
         {
             return GetOrderStatuses(this.OrderID);
         }
-        //public static List<clsCartDTO> GetCartItemsByOrderID(int OrderID)
-        //{
-        //    return clsCartsData.GetCartItemsByOrderID(OrderID);
-        //}
-        public static List<clsCart2DTO> GetCartItemsByOrderID2(int OrderID)
+        public static List<clsCartDTO> GetCartItemsByOrderID(int OrderID)
         {
             return clsCartsData.GetCart(OrderID);
         }
-        //public List<clsCartDTO> GetCartItemsByOrderID()
-        //{
-        //    return GetCartItemsByOrderID(this.OrderID);
-        //}
-        public List<clsCart2DTO> GetCartItemsByOrderID2()
+        public List<clsCartDTO> GetCartItemsByOrderID()
         {
-            return GetCartItemsByOrderID2(this.OrderID);
+            return GetCartItemsByOrderID(this.OrderID);
         }
-        //public static decimal CalculateCartTotalAmount(List<clsCheckoutCartItemsDTO> CheckoutCartItems)
-        //{
-        //    return clsCartsData.CalculateCartTotalAmount(CheckoutCartItems);
-        //}
-        public static decimal CalculateCartTotalAmount2(List<clsCart2DTO> CartDTO)
+        public static decimal CalculateCartTotalAmount(List<clsCartDTO> CartDTO)
         {
-            return clsCartsData.CalculateCartTotalAmount2(CartDTO);
+            return clsCartsData.CalculateCartTotalAmount(CartDTO);
         }
-        //public static List<clsCheckoutCartItemsDTO> SyncCartItemsWithDatabase(List<clsCheckoutCartItemsDTO> CheckoutCartItems)
-        //{
-        //    return clsCartsData.SyncCartItemsWithDatabase(CheckoutCartItems);
-        //}
-        public static List<clsCart2DTO> SyncCartItemsWithDatabase2(List<clsCart2DTO> CartDTO)
+        public static List<clsCartDTO> SyncCartItemsWithDatabase(List<clsCartDTO> CartDTO)
         {
-            return clsCartsData.SyncCartItemsWithDatabase2(CartDTO);
+            return clsCartsData.SyncCartItemsWithDatabase(CartDTO);
         }
         public clsPaymentInfoDTO GetOrderPaymentsInfo()
         {
@@ -232,25 +190,7 @@ namespace RestaurantBusiness
         {
             return degrees * Math.PI / 180;
         }
-        //public static bool IsCartUpToDate(List<clsCheckoutCartItemsDTO> CheckoutCartItemsDTO, List<clsCheckoutCartItemsDTO> UpdatedCheckoutCartItemsDTO)
-        //{
-        //    if (CheckoutCartItemsDTO.Count != UpdatedCheckoutCartItemsDTO.Count)
-        //    {
-        //        return false;
-        //    }
-
-        //    var OrderedByASCCheckoutCartItemsDTO = CheckoutCartItemsDTO.OrderBy(p => p.ProductID).ToList();
-
-        //    for (int i = 0; i < UpdatedCheckoutCartItemsDTO.Count; i++)
-        //    {
-        //        if (UpdatedCheckoutCartItemsDTO[i].Price != OrderedByASCCheckoutCartItemsDTO[i].Price)
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //    return true;
-        //}
-        public static bool IsCartUpToDate2(List<clsCart2DTO> CheckoutCartCartDTO)
+        public static bool IsCartUpToDate(List<clsCartDTO> CheckoutCartCartDTO)
         {
             return clsCartsData.IsCartUpToDate(CheckoutCartCartDTO);
         }

@@ -130,7 +130,6 @@ namespace RestaurantBusiness
         }
         public static bool IsRestaurantOpenNow(ref string OpeningHours)
         {
-            //return clsShiftsData.IsRestaurantOpenNow();
             List<clsShiftDTO> ShiftList = GetAllShifts();
 
             if(ShiftList == null)
@@ -185,6 +184,10 @@ namespace RestaurantBusiness
                 return true;
             }
             return false;
+        }
+        public static bool IsRestaurantOpenNow()
+        {
+            return clsShiftsData.IsRestaurantOpenNow();
         }
         public static List<int> GetDaysWithoutSchedule()
         {

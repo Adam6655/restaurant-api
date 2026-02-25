@@ -6,10 +6,12 @@ using RestaurantDTOs;
 
 namespace RestaurantApi.Controllers
 {
-    [Route("api/Settings")]
     [ApiController]
+    [Route("api/Settings")]
+    [Authorize]
     public class SettingsController : ControllerBase
     {
+        [Authorize(Roles = "Admin")]
         [HttpGet(Name = "GetSettingsData")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status408RequestTimeout)]

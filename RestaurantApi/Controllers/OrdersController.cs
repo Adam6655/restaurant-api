@@ -1,18 +1,22 @@
 ﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantBusiness;
 using RestaurantData;
 using RestaurantDTOs;
 using System.Collections.Generic;
+using System.Security.Claims;
 using static RestaurantBusiness.clsUserRole;
 
 namespace RestaurantApi.Controllers
 {
-    [Route("api/Orders")]
     [ApiController]
+    [Route("api/Orders")]
+    [Authorize]
     public class OrdersController : ControllerBase
     {
+        [Authorize(Roles = "Customer")]
         [HttpPost(Name = "AddNewOrder")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -30,9 +34,9 @@ namespace RestaurantApi.Controllers
                     return BadRequest($"Employees Cant Order");
                 }
 
-                List<clsCheckoutCartItemsDTO> UpdatedCheckoutCartItemsDTO = clsOrder.SyncCartItemsWithDatabase(ProcessOrderDTO.CheckoutCartItemsDTO);
-                if (!clsOrder.IsCartUpToDate(ProcessOrderDTO.CheckoutCartItemsDTO, UpdatedCheckoutCartItemsDTO))
+                if (!clsOrder.IsCartUpToDate(ProcessOrderDTO.CheckoutCartItemsDTO))
                 {
+                    List<clsCartDTO> UpdatedCheckoutCartItemsDTO = clsOrder.SyncCartItemsWithDatabase(ProcessOrderDTO.CheckoutCartItemsDTO);
                     return Ok(UpdatedCheckoutCartItemsDTO);
                 }
                 
@@ -70,6 +74,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Admin")]
         [HttpPut("{orderID}/driver/{newDriverID}", Name = "UpdateOrderDriver")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -95,30 +100,27 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
-        [HttpPut("{orderID}/statuses/user/{userID}", Name = "UpdateOrderStatuses")]
+        [Authorize(Roles = "Admin,Staff,Driver")]
+        [HttpPut("{orderID}/statuses", Name = "UpdateOrderStatuses")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public ActionResult<clsOrderDTO> UpdateOrderStatuses(int orderID, int userID)
+        public ActionResult<clsOrderDTO> UpdateOrderStatuses(int orderID)
         {
+            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var UserRole = User.FindFirstValue(ClaimTypes.Role);
             try
             {
                 clsOrder Order = clsOrder.Find(orderID);
 
-                int? UserRole = clsUser.GetUserRole(userID);
-
-                if (UserRole == null)
-                {
-                    return BadRequest($"You Have No Authorization To Update The Status Of The Order");
-                }
-
                 byte? OrderCurrentStatus = Order.GetOrderCurrentStatus();
 
-                if (UserRole == (int)clsUserRole.enUserRole.Driver)
+                if (UserRole == "Driver")
                 {
-                    if ((Order.ServiceType == (byte)clsOrder.enServiceType.Delivery) && !clsOrder.IsOrderAssignedToDriver(OrderID, UserID))
+                    if ((Order.ServiceType == (byte)clsOrder.enServiceType.Delivery) && !clsOrder.IsOrderAssignedToDriver(orderID, int.Parse(userID)))
                     {
                         return BadRequest($"You are not assigned to the order in order to update it");
                     }
@@ -132,7 +134,7 @@ namespace RestaurantApi.Controllers
                     }
                 }
 
-                if (UserRole != (int)clsUserRole.enUserRole.Driver)
+                if (UserRole != "Driver")
                 {
                     if (Order.ServiceType == (byte)clsOrder.enServiceType.Delivery && OrderCurrentStatus >= (byte)clsOrder.enOrderStatus.ReadyToDeliver)
                     {
@@ -164,15 +166,24 @@ namespace RestaurantApi.Controllers
             try
             {
                 clsOrder Order = clsOrder.Find(OrderID);
-
+                
                 if (Order == null)
                 {
                     return NotFound("Could Not Find The Order");
                 }
-                else
+                var ID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var userRole = User.FindFirstValue(ClaimTypes.Role);
+
+                int authenticatedUserID = int.Parse(ID);
+
+                bool IsCustomer = userRole == "Customer";
+
+                if (IsCustomer && authenticatedUserID != Order.UserID)
                 {
-                    return Ok(Order.OrderDTO);
+                    return Forbid();
                 }
+                return Ok(Order.OrderDTO);
             }
             catch (Exception ex)
             {
@@ -180,6 +191,7 @@ namespace RestaurantApi.Controllers
             }
 
         }
+        [Authorize(Roles = "Admin,Staff,Driver")]
         [HttpGet("{orderID}/status", Name = "GetOrderStatuses")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -202,6 +214,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Admin")]
         [HttpGet("all", Name = "GetAllOrders")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -224,6 +237,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Admin,Staff,Driver")]
         [HttpGet("status/{orderStatus}", Name = "GetAllOrdersByOrderStatus")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -268,22 +282,18 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
-        [HttpPut("users/{userID}/orders/{orderID}/complete", Name = "MarkOrderAsCompleted")]
+        [Authorize(Roles = "Admin,Staff,Driver")]
+        [HttpPut("orders/{orderID}/complete", Name = "MarkOrderAsCompleted")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public ActionResult<IEnumerable<clsAddOnDTO>> MarkOrderAsCompleted(int orderID, int userID)
+        public ActionResult<IEnumerable<clsAddOnDTO>> MarkOrderAsCompleted(int orderID)
         {
+            var UserRole = User.FindFirstValue(ClaimTypes.Role);
+
             try
             {
-                int? UserRole = clsUser.GetUserRole(userID);
-
-                if (UserRole == null)
-                {
-                    return BadRequest($"You Have No Authorization To Update The Status Of The Order");
-                }
-
                 clsOrder Order = clsOrder.Find(orderID);
                 byte? OrderCurrentStatus = Order.GetOrderCurrentStatus();
 
@@ -292,11 +302,11 @@ namespace RestaurantApi.Controllers
                     return BadRequest($"The Order Cant Be Marked As Completed At This Current Status");
                 }
 
-                if (UserRole == (int)clsUserRole.enUserRole.Driver && OrderCurrentStatus != (byte)clsOrder.enOrderStatus.Arrived)
+                if (UserRole == "Driver" && OrderCurrentStatus != (byte)clsOrder.enOrderStatus.Arrived)
                 {
                     return BadRequest($"The Driver Cant Update The Status Of The Order");
                 }
-                if (UserRole != (int)clsUserRole.enUserRole.Driver && OrderCurrentStatus == (byte)clsOrder.enOrderStatus.Arrived)
+                if (UserRole != "Driver" && OrderCurrentStatus == (byte)clsOrder.enOrderStatus.Arrived)
                 {
                     return BadRequest($"Only The Driver can Mark The Order As Completed");
                 }
@@ -315,16 +325,17 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Customer")]
         [HttpGet("sync-cart", Name = "SyncCartItemsWithDatabase")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public ActionResult<IEnumerable<clsCheckoutCartItemsDTO>> SyncCartItemsWithDatabase(List<clsCheckoutCartItemsDTO> CheckoutCartItems)
+        public ActionResult<IEnumerable<clsCartDTO>> SyncCartItemsWithDatabase(List<clsCartDTO> CheckoutCartItems)
         {
             try
             {
-                List<clsCheckoutCartItemsDTO> UpdatedCheckoutCartItemsDTO = clsOrder.SyncCartItemsWithDatabase(CheckoutCartItems);
+                List<clsCartDTO> UpdatedCheckoutCartItemsDTO = clsOrder.SyncCartItemsWithDatabase(CheckoutCartItems);
 
                 if (UpdatedCheckoutCartItemsDTO.Count == 0)
                 {

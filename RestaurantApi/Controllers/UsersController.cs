@@ -1,48 +1,18 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantBusiness;
 using RestaurantData;
 using RestaurantDTOs;
+using System.Security.Claims;
 
 namespace RestaurantApi.Controllers
 {
-    [Route("api/Users")]
     [ApiController]
+    [Route("api/Users")]
+    [Authorize]
     public class UsersController : ControllerBase
     {
-        [HttpPost(Name = "AddNewUser")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public ActionResult<clsUserDTO> AddNewUser(clsUserDTO UserDTO)
-        {
-            try
-            {
-                clsUser User = new clsUser();
-
-                User.UserName = UserDTO.UserName;
-                User.DeviceToken = UserDTO.DeviceToken;
-                User.Email = UserDTO.Email;
-                User.PasswordHash = UserDTO.PasswordHash;
-                User.Phone = UserDTO.Phone;
-
-                if (User.Save())
-                {
-                    UserDTO.UserID = User.UserID;
-                    return CreatedAtRoute("GetUserByID", new { UserID = UserDTO.UserID }, UserDTO);
-                }
-                else
-                {
-                    return BadRequest("Failed Creating An Account");
-                }
-            }
-            catch (Exception ex)
-            {
-                return (ActionResult)clsAppGlobals.HandleError(ex);
-            }
-        }
         [HttpPut(Name = "UpdateUser")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -51,6 +21,18 @@ namespace RestaurantApi.Controllers
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public ActionResult<clsUserDTO> UpdateUser(clsUserDTO UserDTO)
         {
+            var ID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var userRole = User.FindFirstValue(ClaimTypes.Role);
+
+            int authenticatedUserID = int.Parse(ID);
+
+            bool IsAdmin = userRole == "Admin";
+
+            if (!IsAdmin && authenticatedUserID != UserDTO.UserID)
+            {
+                return Forbid();
+            }
             try
             {
                 clsUser User = clsUser.Find(UserDTO.UserID);
@@ -65,6 +47,7 @@ namespace RestaurantApi.Controllers
                 User.Email = UserDTO.Email;
                 User.PasswordHash = UserDTO.PasswordHash;
                 User.Phone = UserDTO.Phone;
+                User.RefreshTokenHash = UserDTO.RefreshTokenHash;
 
                 if (User.Save())
                 {
@@ -85,11 +68,23 @@ namespace RestaurantApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public ActionResult<clsUserDTO> GetUserByID(int id)
+        public ActionResult<clsUserDTO> GetUserByID(int userId)
         {
+            var ID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var userRole = User.FindFirstValue(ClaimTypes.Role);
+
+            int authenticatedUserID = int.Parse(ID);
+
+            bool IsAdmin = userRole == "Admin";
+
+            if (!IsAdmin && authenticatedUserID != userId)
+            {
+                return Forbid();
+            }
             try
             {
-                clsUser User = clsUser.Find(id);
+                clsUser User = clsUser.Find(userId);
 
                 if (User == null)
                 {
@@ -105,56 +100,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
-        [HttpGet("username/{userName}", Name = "GetUserByUserName")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public ActionResult<clsUserDTO> GetUserByUserName(string userName)
-        {
-            try
-            {
-                clsUser User = clsUser.Find(userName);
-
-                if (User == null)
-                {
-                    return NotFound("Could Not Find The User");
-                }
-                else
-                {
-                    return Ok(User.UserDTO);
-                }
-            }
-            catch (Exception ex)
-            {
-                return (ActionResult)clsAppGlobals.HandleError(ex);
-            }
-        }
-        [HttpGet(Name = "GetUserByUserNameAndPassword")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
-        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
-        public ActionResult<clsUserDTO> GetUserByUserNameAndPassword(clsLoginRequestDTO loginRequestDTO)
-        {
-            try
-            {
-                clsUser User = clsUser.Find(loginRequestDTO.UserName, loginRequestDTO.PasswordHash);
-
-                if (User == null)
-                {
-                    return NotFound("Could Not Find The User");
-                }
-                else
-                {
-                    return Ok(User.UserDTO);
-                }
-            }
-            catch (Exception ex)
-            {
-                return (ActionResult)clsAppGlobals.HandleError(ex);
-            }
-        }
+        [Authorize(Roles = "Customer")]
         [HttpGet("{userID}/coins/transactions", Name = "GetUserCoinsTransactionsHistory")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -162,6 +108,12 @@ namespace RestaurantApi.Controllers
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public ActionResult<IEnumerable<clsCoinTransactionDTO>> GetUserCoinsTransactionsHistory(int userID)
         {
+            var ID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userID != int.Parse(ID))
+            {
+                return Forbid();
+            }
             try
             {
                 List<clsCoinTransactionDTO> UserCoinsTransactionsHistoryList = clsUser.GetUserCoinsTransactionsHistory(userID);
@@ -177,6 +129,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Customer")]
         [HttpGet("{userID}/orders", Name = "GetAllUserOrders")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -184,6 +137,12 @@ namespace RestaurantApi.Controllers
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public ActionResult<IEnumerable<clsOrderDTO>> GetAllUserOrders(int userID)
         {
+            var ID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userID != int.Parse(ID))
+            {
+                return Forbid();
+            }
             try
             {
                 List<clsOrderDTO> UserOrdersList = clsUser.GetAllUserOrders(userID);
@@ -199,6 +158,7 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [Authorize(Roles = "Admin,Driver")]
         [HttpGet("{driverID}/delivery-orders", Name = "GetDriverDeliveryOrders")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -233,13 +193,20 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
-        [HttpGet("{userID}/savings/coins", Name = "GetDriverDeliveryOrders")]
+        [Authorize(Roles = "Customer")]
+        [HttpGet("{userID}/savings/coins", Name = "GetUserCoinSavingsSummary")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
         [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
         public ActionResult<clsCoinSavingsSummaryDTO> GetUserCoinSavingsSummary(int userID)
         {
+            var ID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userID != int.Parse(ID))
+            {
+                return Forbid();
+            }
             try
             {
                 clsUser User = clsUser.Find(userID);

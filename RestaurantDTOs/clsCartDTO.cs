@@ -6,26 +6,6 @@ using System.Threading.Tasks;
 
 namespace RestaurantDTOs
 {
-    //public class clsCartDTO
-    //{
-    //    public int ProductName { get; set; }
-    //    public string ProductDescription { get; set; }
-    //    public byte Quantity { get; set; }
-    //    public decimal Price { get; set; }
-    //    public string ImageURL { get; set; }
-    //    public int Calories { get; set; }
-    //    public string? Notes { get; set; }
-    //    public clsCartDTO(int productName, string productDescription, byte quantity, decimal price, string imageURL, int calories, string? notes)
-    //    {
-    //        ProductName = productName;
-    //        ProductDescription = productDescription;
-    //        Quantity = quantity;
-    //        Price = price;
-    //        ImageURL = imageURL;
-    //        Calories = calories;
-    //        Notes = notes;
-    //    }
-    //}
     public class clsCheckoutCartItemsDTO
     {
         public int ProductID { get; set; }
@@ -40,13 +20,13 @@ namespace RestaurantDTOs
             Notes = notes;
         }
     }
-    public class clsCart2DTO
+    public class clsCartDTO
     {
         public clsProductDTO Product { get; set; }
         public byte Quantity { get; set; }
         public string? Notes { get; set; }
         public List<clsAddOnDTO> AddOns { get; set; }
-        public clsCart2DTO(clsProductDTO product, byte quantity, string? notes, List<clsAddOnDTO> addOns)
+        public clsCartDTO(clsProductDTO product, byte quantity, string? notes, List<clsAddOnDTO> addOns)
         {
             Product = product;
             Quantity = quantity;
