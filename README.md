@@ -79,6 +79,7 @@ You can test all endpoints directly from Swagger UI.
 Tested manually using Swagger UI
 All secured endpoints require a valid JWT token
 Future improvement: Add unit and integration testing.
+
 🔒 Security Features
 JWT Authentication
 Refresh Token mechanism
@@ -86,6 +87,7 @@ Role-based authorization
 Ownership validation
 Protected endpoints
 Environment-based secret storage
+
 📌 Future Improvements
 Add Unit Testing (xUnit)
 Add Integration Testing
@@ -93,6 +95,7 @@ Implement Logging (Serilog)
 Add Docker support
 CI/CD pipeline
 Cloud deployment (Azure / AWS)
+
 👨‍💻 Author
 Adam Hagos
 Backend Developer | ASP.NET Core
