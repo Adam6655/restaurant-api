@@ -1,4 +1,5 @@
 🍽️ Restaurant Management API
+
 A secure and modular Restaurant Management System API built with ASP.NET Core 8 Web API, implementing JWT authentication, refresh tokens, role-based authorization, and ownership validation.
 This project follows a layered architecture and supports restaurant operations such as orders, products, cart management, loyalty points, payments, and more.
 
