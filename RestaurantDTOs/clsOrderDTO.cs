@@ -46,8 +46,8 @@ namespace RestaurantDTOs
     {
         public clsOrderDTO OrderDTO { get; set; }
         public clsPaymentInfoDTO PaymentInfoDTO { get; set; }
-        public clsCartDTO Cart { get; set; }
-        public clsOrderFullDetailsDTO(clsOrderDTO orderDTO, clsPaymentInfoDTO paymentInfoDTO, clsCartDTO cart)
+        public List<clsCartDTO> Cart { get; set; }
+        public clsOrderFullDetailsDTO(clsOrderDTO orderDTO, clsPaymentInfoDTO paymentInfoDTO, List<clsCartDTO> cart)
         {
             this.OrderDTO = orderDTO;
             this.PaymentInfoDTO = paymentInfoDTO;

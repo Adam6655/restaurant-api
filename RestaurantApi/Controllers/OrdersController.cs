@@ -348,5 +348,42 @@ namespace RestaurantApi.Controllers
                 return (ActionResult)clsAppGlobals.HandleError(ex);
             }
         }
+        [HttpGet("{orderID}/details", Name = "GetOrderDetails")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
+        [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+        public ActionResult<clsOrderFullDetailsDTO> GetOrderDetails(int OrderID)
+        {
+            try
+            {
+                clsOrder Order = clsOrder.Find(OrderID);
+
+                if (Order == null)
+                {
+                    return NotFound("Could Not Find The Order");
+                }
+                var ID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var userRole = User.FindFirstValue(ClaimTypes.Role);
+
+                int authenticatedUserID = int.Parse(ID);
+
+                bool IsCustomer = userRole == "Customer";
+
+                if (IsCustomer && authenticatedUserID != Order.UserID)
+                {
+                    return Forbid();
+                }
+                clsOrderFullDetailsDTO orderDetailsDTO = new clsOrderFullDetailsDTO(Order.OrderDTO, Order.GetOrderPaymentsInfo(), Order.GetCartItemsByOrderID());
+
+                return Ok(orderDetailsDTO);
+            }
+            catch (Exception ex)
+            {
+                return (ActionResult)clsAppGlobals.HandleError(ex);
+            }
+
+        }
     }
 }
